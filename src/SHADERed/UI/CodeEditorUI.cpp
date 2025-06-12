@@ -7,7 +7,8 @@
 #include <SHADERed/UI/CodeEditorUI.h>
 #include <SHADERed/UI/PreviewUI.h>
 #include <SHADERed/UI/UIHelper.h>
-#include <misc/ImFileDialog.h>
+#include <ImFileDialog/ImFileDialog.h>
+#include <ImFileDialog/libs/apifilesystem/ghc/filesystem.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -17,7 +18,7 @@
 
 #if defined(_WIN32)
 #include <windows.h>
-#elif defined(__linux__) || defined(__unix__)
+#elif defined(__linux__)
 #include <fcntl.h>
 #include <sys/inotify.h>
 #include <sys/types.h>
@@ -1541,10 +1542,9 @@ namespace ed {
 		std::vector<std::string> paths;		// list of all paths that we should have "notifications turned on"
 
 		m_trackUpdatesNeeded = 0;
-
 #if defined(__APPLE__)
 		// TODO: implementation for macos (cant test)
-#elif defined(__linux__) || defined(__unix__)
+#elif defined(__linux__)
 
 		int bufLength, bufIndex = 0;
 		int notifyEngine = inotify_init1(IN_NONBLOCK);
@@ -1696,7 +1696,7 @@ namespace ed {
 			if (needsUpdate || nPasses.size() != passes.size() || curProject != m_data->Parser.GetOpenedFile() || paths.size() == 0) {
 #if defined(__APPLE__)
 				// TODO: implementation for macos
-#elif defined(__linux__) || defined(__unix__)
+#elif defined(__linux__)
 				for (int i = 0; i < notifyIDs.size(); i++)
 					inotify_rm_watch(notifyEngine, notifyIDs[i]);
 				notifyIDs.clear();
@@ -1813,7 +1813,7 @@ namespace ed {
 
 #if defined(__APPLE__)
 				// TODO: implementation for macos
-#elif defined(__linux__) || defined(__unix__)
+#elif defined(__linux__)
 				// create HANDLE to all tracked directories
 				notifyIDs.resize(paths.size());
 				for (int i = 0; i < paths.size(); i++)
@@ -1845,11 +1845,13 @@ namespace ed {
 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 				continue;
 			}
-
+#if (!defined(_WIN32) && !defined(__APPLE__) && !defined(__linux__))
+	}
+#endif
 #if defined(__APPLE__)
 			// TODO: implementation for macos
 		}
-#elif defined(__linux__) || defined(__unix__)
+#elif defined(__linux__)
 			fd_set rfds;
 			int eCount = select(notifyEngine + 1, &rfds, NULL, NULL, NULL);
 

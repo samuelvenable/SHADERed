@@ -40,7 +40,8 @@
 #include <imgui/examples/imgui_impl_opengl3.h>
 #include <imgui/examples/imgui_impl_sdl.h>
 #include <imgui/imgui.h>
-#include <misc/ImFileDialog.h>
+#include <ImFileDialog/ImFileDialog.h>
+#include <ImFileDialog/libs/apifilesystem/ghc/filesystem.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -150,7 +151,7 @@ namespace ed {
 		io.ConfigDockingWithShift = false;
 
 		if (!ed::Settings::Instance().LinuxHomeDirectory.empty()) {
-			if (!std::filesystem::exists(m_uiIniFile) && std::filesystem::exists("data/workspace.dat"))
+			if (!ghc::filesystem::exists(m_uiIniFile) && ghc::filesystem::exists("data/workspace.dat"))
 				ImGui::LoadIniSettingsFromDisk("data/workspace.dat");
 		}
 
@@ -456,19 +457,19 @@ namespace ed {
 			fonts->Clear();
 
 			ImFont* font = nullptr;
-			if (std::filesystem::exists(m_cachedFont))
+			if (ghc::filesystem::exists(m_cachedFont))
 				font = fonts->AddFontFromFileTTF(m_cachedFont.c_str(), m_cachedFontSize * Settings::Instance().DPIScale);
 
 			// icon font
 			static const ImWchar icon_ranges[] = { 0xea5b, 0xf026, 0 };
-			if (font && std::filesystem::exists("data/icofont.ttf")) {
+			if (font && ghc::filesystem::exists("data/icofont.ttf")) {
 				ImFontConfig config;
 				config.MergeMode = true;
 				fonts->AddFontFromFileTTF("data/icofont.ttf", m_cachedFontSize * Settings::Instance().DPIScale, &config, icon_ranges);
 			}
 
 			ImFont* edFontPtr = nullptr;
-			if (std::filesystem::exists(edFont.first))
+			if (ghc::filesystem::exists(edFont.first))
 				edFontPtr = fonts->AddFontFromFileTTF(edFont.first.c_str(), edFont.second * Settings::Instance().DPIScale);
 
 			if (font == nullptr || edFontPtr == nullptr) {
@@ -480,7 +481,7 @@ namespace ed {
 			}
 
 			// icon font large
-			if (std::filesystem::exists("data/icofont.ttf")) {
+			if (ghc::filesystem::exists("data/icofont.ttf")) {
 				ImFontConfig configIconsLarge;
 				m_iconFontLarge = ImGui::GetIO().Fonts->AddFontFromFileTTF("data/icofont.ttf", Settings::Instance().CalculateSize(TOOLBAR_HEIGHT / 2), &configIconsLarge, icon_ranges);
 			}
@@ -732,8 +733,8 @@ namespace ed {
 				if (ImGui::BeginMenu("Open Recent")) {
 					int recentCount = 0;
 					for (int i = 0; i < m_recentProjects.size(); i++) {
-						std::filesystem::path path(m_recentProjects[i]);
-						if (!std::filesystem::exists(path))
+						ghc::filesystem::path path(m_recentProjects[i]);
+						if (!ghc::filesystem::exists(path))
 							continue;
 
 						recentCount++;
@@ -1910,8 +1911,8 @@ namespace ed {
 
 		// first clear the old data and create new directory
 		std::error_code ec;
-		std::filesystem::remove_all(outputPath, ec);
-		std::filesystem::create_directory(outputPath);
+		ghc::filesystem::remove_all(outputPath, ec);
+		ghc::filesystem::create_directory(outputPath);
 
 		if (m_selectedTemplate == "?empty") {
 			Settings::Instance().Project.FPCamera = false;
@@ -1931,7 +1932,7 @@ namespace ed {
 			SDL_SetWindowTitle(m_wnd, ("SHADERed (" + m_selectedTemplate + ")").c_str());
 		}
 
-		std::string savePath = (std::filesystem::path(outputPath) / "project.sprj").generic_string();
+		std::string savePath = (ghc::filesystem::path(outputPath) / "project.sprj").generic_string();
 		m_data->Parser.SaveAs(savePath, true);
 		Open(savePath);
 		m_data->Parser.SetOpenedFile("");
@@ -2387,7 +2388,7 @@ namespace ed {
 		}
 		if (ifd::FileDialog::Instance().IsDone("CreateTextureDlg")) {
 			if (ifd::FileDialog::Instance().HasResult()) {
-				const std::vector<std::filesystem::path>& results = ifd::FileDialog::Instance().GetResults();
+				const std::vector<ghc::filesystem::path>& results = ifd::FileDialog::Instance().GetResults();
 				for (const auto& res : results)
 					m_data->Objects.CreateTexture(res.u8string());
 			}
@@ -2396,7 +2397,7 @@ namespace ed {
 		}
 		if (ifd::FileDialog::Instance().IsDone("CreateTexture3DDlg")) {
 			if (ifd::FileDialog::Instance().HasResult()) {
-				const std::vector<std::filesystem::path>& results = ifd::FileDialog::Instance().GetResults();
+				const std::vector<ghc::filesystem::path>& results = ifd::FileDialog::Instance().GetResults();
 				for (const auto& res : results)
 					m_data->Objects.CreateTexture3D(res.u8string());
 			}
@@ -2492,7 +2493,7 @@ namespace ed {
 			static std::string left, top, front, bottom, right, back;
 			float btnWidth = Settings::Instance().CalculateSize(65.0f);
 
-			ImGui::Text("Left: %s", std::filesystem::path(left).filename().string().c_str());
+			ImGui::Text("Left: %s", ghc::filesystem::path(left).filename().string().c_str());
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - btnWidth);
 			if (ImGui::Button("Change##left")) {
@@ -2500,7 +2501,7 @@ namespace ed {
 				ifd::FileDialog::Instance().Open("CubemapFaceDlg", "Select cubemap face - left", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.dds){.png,.jpg,.jpeg,.bmp,.tga,.dds},.*");
 			}
 
-			ImGui::Text("Top: %s", std::filesystem::path(top).filename().string().c_str());
+			ImGui::Text("Top: %s", ghc::filesystem::path(top).filename().string().c_str());
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - btnWidth);
 			if (ImGui::Button("Change##top")) {
@@ -2508,7 +2509,7 @@ namespace ed {
 				ifd::FileDialog::Instance().Open("CubemapFaceDlg", "Select cubemap face - top", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.dds){.png,.jpg,.jpeg,.bmp,.tga,.dds},.*");
 			}
 
-			ImGui::Text("Front: %s", std::filesystem::path(front).filename().string().c_str());
+			ImGui::Text("Front: %s", ghc::filesystem::path(front).filename().string().c_str());
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - btnWidth);
 			if (ImGui::Button("Change##front")) {
@@ -2516,7 +2517,7 @@ namespace ed {
 				ifd::FileDialog::Instance().Open("CubemapFaceDlg", "Select cubemap face - front", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.dds){.png,.jpg,.jpeg,.bmp,.tga,.dds},.*");
 			}
 
-			ImGui::Text("Bottom: %s", std::filesystem::path(bottom).filename().string().c_str());
+			ImGui::Text("Bottom: %s", ghc::filesystem::path(bottom).filename().string().c_str());
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - btnWidth);
 			if (ImGui::Button("Change##bottom")) {
@@ -2524,7 +2525,7 @@ namespace ed {
 				ifd::FileDialog::Instance().Open("CubemapFaceDlg", "Select cubemap face - bottom", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.dds){.png,.jpg,.jpeg,.bmp,.tga,.dds},.*");
 			}
 
-			ImGui::Text("Right: %s", std::filesystem::path(right).filename().string().c_str());
+			ImGui::Text("Right: %s", ghc::filesystem::path(right).filename().string().c_str());
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - btnWidth);
 			if (ImGui::Button("Change##right")) {
@@ -2532,7 +2533,7 @@ namespace ed {
 				ifd::FileDialog::Instance().Open("CubemapFaceDlg", "Select cubemap face - right", "Image file (*.png;*.jpg;*.jpeg;*.bmp;*.tga;*.dds){.png,.jpg,.jpeg,.bmp,.tga,.dds},.*");
 			}
 
-			ImGui::Text("Back: %s", std::filesystem::path(back).filename().string().c_str());
+			ImGui::Text("Back: %s", ghc::filesystem::path(back).filename().string().c_str());
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - btnWidth);
 			if (ImGui::Button("Change##back")) {
@@ -3223,8 +3224,8 @@ namespace ed {
 
 		Logger::Get().Log("Loading template list");
 
-		if (std::filesystem::exists("./templates/")) {
-			for (const auto& entry : std::filesystem::directory_iterator("./templates/")) {
+		if (ghc::filesystem::exists("./templates/")) {
+			for (const auto& entry : ghc::filesystem::directory_iterator("./templates/")) {
 				std::string file = entry.path().filename().string();
 				m_templates.push_back(file);
 

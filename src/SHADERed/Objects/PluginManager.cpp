@@ -13,7 +13,8 @@
 #include <SHADERed/UI/PropertyUI.h>
 #include <SHADERed/UI/UIHelper.h>
 
-#include <misc/ImFileDialog.h>
+#include <ImFileDialog/ImFileDialog.h>
+#include <ImFileDialog/libs/apifilesystem/ghc/filesystem.hpp>
 
 #include <imgui/imgui.h>
 #include <vector>
@@ -56,7 +57,7 @@ namespace ed {
 		
 		std::string pluginsDirLoc = Settings::Instance().ConvertPath("plugins/");
 
-		if (!std::filesystem::exists(pluginsDirLoc)) {
+		if (!ghc::filesystem::exists(pluginsDirLoc)) {
 			ed::Logger::Get().Log("Directory for plugins doesn't exist");
 			return;
 		}
@@ -77,7 +78,7 @@ namespace ed {
 		std::vector<std::string> allNames;
 		std::vector<std::string>& notLoaded = Settings::Instance().Plugins.NotLoaded;
 
-		for (const auto& entry : std::filesystem::directory_iterator(pluginsDirLoc)) {
+		for (const auto& entry : ghc::filesystem::directory_iterator(pluginsDirLoc)) {
 			if (entry.is_directory()) {
 				std::string pdir = entry.path().filename().string();
 

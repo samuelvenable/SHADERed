@@ -7,7 +7,8 @@
 #include <SHADERed/UI/OptionsUI.h>
 #include <SHADERed/UI/UIHelper.h>
 
-#include <misc/ImFileDialog.h>
+#include <ImFileDialog/ImFileDialog.h>
+#include <ImFileDialog/libs/apifilesystem/ghc/filesystem.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -82,7 +83,7 @@ namespace ed {
 		
 		if (ifd::FileDialog::Instance().IsDone("OptionsFontDlg")) {
 			if (ifd::FileDialog::Instance().HasResult()) {
-				std::string file = std::filesystem::relative(ifd::FileDialog::Instance().GetResult()).generic_u8string();
+				std::string file = ghc::filesystem::relative(ifd::FileDialog::Instance().GetResult()).generic_u8string();
 				strcpy(m_dialogPath, file.c_str());
 			}
 			ifd::FileDialog::Instance().Close();
@@ -225,8 +226,8 @@ namespace ed {
 			pathList.push_back(Settings().Instance().LinuxHomeDirectory + "themes/");
 
 		for (const auto& pathToCheck : pathList) {
-			if (std::filesystem::exists(pathToCheck)) {
-				for (const auto& entry : std::filesystem::directory_iterator(pathToCheck)) {
+			if (ghc::filesystem::exists(pathToCheck)) {
+				for (const auto& entry : ghc::filesystem::directory_iterator(pathToCheck)) {
 					m_themes.push_back(ThemeContainer::Instance().LoadTheme(entry.path().generic_string()));
 				}
 			}
@@ -383,7 +384,7 @@ namespace ed {
 		ImGui::SameLine();
 		ImGui::PushItemWidth(-1);
 		if (ImGui::BeginCombo("##optg_template", settings->General.StartUpTemplate.c_str())) {
-			for (const auto& entry : std::filesystem::directory_iterator("./templates")) {
+			for (const auto& entry : ghc::filesystem::directory_iterator("./templates")) {
 				std::string file = entry.path().filename().string();
 				if (file[0] != '.' && ImGui::Selectable(file.c_str(), file == settings->General.StartUpTemplate))
 					settings->General.StartUpTemplate = file;

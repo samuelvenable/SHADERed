@@ -6,7 +6,8 @@
 #include <SHADERed/UI/PropertyUI.h>
 #include <SHADERed/UI/UIHelper.h>
 
-#include <misc/ImFileDialog.h>
+#include <ImFileDialog/ImFileDialog.h>
+#include <ImFileDialog/libs/apifilesystem/ghc/filesystem.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -46,7 +47,7 @@ namespace ed {
 				}
 			} else if (m_currentObj != nullptr) {
 				if (IsTexture() || IsTexture3D())
-					ImGui::TextUnformatted(std::filesystem::path(m_currentObj->Name).filename().generic_u8string().c_str());
+					ImGui::TextUnformatted(ghc::filesystem::path(m_currentObj->Name).filename().generic_u8string().c_str());
 				else
 					ImGui::TextUnformatted(m_currentObj->Name.c_str());
 				if (IsRenderTexture())

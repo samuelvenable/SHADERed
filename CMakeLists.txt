@@ -5,6 +5,8 @@ project(SHADERed)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -ggdb")
+
 # source code
 set(SOURCES
 	main.cpp
@@ -109,7 +111,6 @@ set(SOURCES
 	libs/pugixml/src/pugixml.cpp
 	libs/ShaderExpressionParser/Parser.cpp
 	libs/ShaderExpressionParser/Tokenizer.cpp
-	libs/misc/ImFileDialog.cpp
 	libs/misc/dds.c
 )
 
@@ -161,6 +162,9 @@ find_package(GLEW REQUIRED)
 # glm
 find_package(GLM REQUIRED)
 
+# ImFileDialog
+add_subdirectory(libs/ImFileDialog)
+
 # SpvGenTwo
 add_subdirectory(libs/SpvGenTwo)
 
@@ -205,13 +209,14 @@ set_target_properties(SHADERed PROPERTIES
 
 # include directories
 target_include_directories(SHADERed PRIVATE ${SDL2_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${ASSIMP_INCLUDE_DIR})
-target_include_directories(SHADERed PRIVATE src libs libs/glslang libs/SPIRV-VM/inc)
+target_include_directories(SHADERed PRIVATE src libs libs/glslang libs/SPIRV-VM/inc libs/ImFileDialog)
+target_include_directories(SHADERed PUBLIC libs/ImFileDialog/libs)
 if (NOT WIN32)
 	target_include_directories(SHADERed PRIVATE ${GTK_INCLUDE_DIRS})
 endif()
 
 # link libraries
-target_link_libraries(SHADERed ${OPENGL_LIBRARIES} ${GLM_LIBRARY_DIRS} glslang SPIRV SPIRVVM assimp::assimp SpvGenTwoLib SpvGenTwoCommon cppdap)
+target_link_libraries(SHADERed ${OPENGL_LIBRARIES} ${GLM_LIBRARY_DIRS} glslang SPIRV SPIRVVM assimp::assimp SpvGenTwoLib SpvGenTwoCommon cppdap ImFileDialog)
 
 if(WIN32)
 	# link specific win32 libraries
@@ -219,10 +224,10 @@ if(WIN32)
 
 elseif(UNIX AND NOT APPLE)
 	# link linux libraries
-	target_link_libraries(SHADERed ${GLEW_LIBRARIES} ${SDL2_LIBRARIES} ${GTK_LIBRARIES} ${CMAKE_DL_LIBS})
+	target_link_libraries(SHADERed ${GLEW_LIBRARIES} ${GTK_LIBRARIES} ${CMAKE_DL_LIBS})
 
 	if (NOT DONT_LINK_FILESYSTEM)
-		target_link_libraries(SHADERed stdc++fs pthread m dl)
+		target_link_libraries(SHADERed pthread m dl)
 	endif()
 elseif(APPLE)
 	target_link_libraries(SHADERed GLEW::GLEW ${SDL2_LIBRARIES} ${GTK_LIBRARIES} ${CMAKE_DL_LIBS})
